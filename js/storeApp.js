@@ -1,18 +1,19 @@
 var storeApp = angular.module('storeApp', ['ngRoute', 'ngCookies']);
 
-storeApp.run(function(bookFactory, $rootScope,$cookieStore, $window, $location) {
+storeApp.run(function (bookFactory, $rootScope,$cookieStore, $window, $location) {
   //initial cart
   $rootScope.booksisbn = [];
   //get books isbn from cookie
   if ($cookieStore.get('booksadded'))
     $rootScope.booksadded = $cookieStore.get('booksadded');
-  else $rootScope.booksadded = [];
+  else 
+    $rootScope.booksadded = [];
   //initial store books list 
   $rootScope.bookList = [];
   $rootScope.cartHover = false;
   //page scroll to top when changing view 
   $rootScope.$on('$routeChangeSuccess', function () {
-    var interval = setInterval(function(){
+    var interval = setInterval(function (){
       if (document.readyState == 'complete') {
         $window.scrollTo(0, 0);
         clearInterval(interval);
@@ -61,6 +62,8 @@ storeApp.directive('bookItem', function() {
       + '</div>'
   };
 });
+
+//directive to prevent page scrolling when scorlling overflowed shopping cart
 storeApp.directive('isolateScrolling', function () {
   return {
     restrict: 'A',
@@ -95,7 +98,25 @@ storeApp.directive('isolateScrolling', function () {
 
           return true;
         });
-        element.bind('mousedown', function (e) {
+        element.bind('touchstart', function (e) {
+          console.log(e);
+          if (e.deltaY > 0 && this.clientHeight + this.scrollTop >= this.scrollHeight) {
+            this.scrollTop = this.scrollHeight - this.clientHeight;
+            e.stopPropagation();
+            e.preventDefault();
+            return false;
+          }
+          else if (e.deltaY < 0 && this.scrollTop <= 0) {
+            this.scrollTop = 0;
+            e.stopPropagation();
+            e.preventDefault();
+            return false;
+          }
+
+          return true;
+        });
+        element.bind('touchmove', function (e) {
+          console.log(e);
           if (e.deltaY > 0 && this.clientHeight + this.scrollTop >= this.scrollHeight) {
             this.scrollTop = this.scrollHeight - this.clientHeight;
             e.stopPropagation();
@@ -114,7 +135,8 @@ storeApp.directive('isolateScrolling', function () {
       }
   };
 });
-//click add to card button with fly to cart effect 
+
+//add to card button with flying to cart effect 
 storeApp.directive('addToCartButton', function($window) {
   function link(scope, element, attributes) {
     element.on('click', function(event){

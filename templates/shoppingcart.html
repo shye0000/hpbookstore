@@ -57,7 +57,7 @@
 				        Remove
 				      </button>
 				    </div>
-				    <div class="product-line-price"> &euro; {{book.nb*book.price}}</div>
+				    <div class="product-line-price">  {{book.nb*book.price&&book.nb<=30? '&euro;' + book.nb*book.price : 'Error, please insert a number smaller than 30 and bigger than 0'}}</div>
 				</div>
 			</div>
 			<div class="noitem" ng-show="booksadded.length==0"> You have 0 item in shopping cart</div>
