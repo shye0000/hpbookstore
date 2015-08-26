@@ -98,40 +98,7 @@ storeApp.directive('isolateScrolling', function () {
 
           return true;
         });
-        element.bind('touchstart', function (e) {
-          console.log(e);
-          if (e.deltaY > 0 && this.clientHeight + this.scrollTop >= this.scrollHeight) {
-            this.scrollTop = this.scrollHeight - this.clientHeight;
-            e.stopPropagation();
-            e.preventDefault();
-            return false;
-          }
-          else if (e.deltaY < 0 && this.scrollTop <= 0) {
-            this.scrollTop = 0;
-            e.stopPropagation();
-            e.preventDefault();
-            return false;
-          }
-
-          return true;
-        });
-        element.bind('touchmove', function (e) {
-          console.log(e);
-          if (e.deltaY > 0 && this.clientHeight + this.scrollTop >= this.scrollHeight) {
-            this.scrollTop = this.scrollHeight - this.clientHeight;
-            e.stopPropagation();
-            e.preventDefault();
-            return false;
-          }
-          else if (e.deltaY < 0 && this.scrollTop <= 0) {
-            this.scrollTop = 0;
-            e.stopPropagation();
-            e.preventDefault();
-            return false;
-          }
-
-          return true;
-        });
+      
       }
   };
 });
