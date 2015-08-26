@@ -1,0 +1,86 @@
+
+<section class="main" role="main">
+	<div class="heading">
+		<div class="cartcheckboxinheader">
+			<div class="squaredTwo">
+				<input type="checkbox" id="checkallinheader" ng-click="allCheckClicked()" ng-model="allChecked">
+				<label for="checkallinheader"></label>
+			</div>
+		</div>
+		<div><h1 class="cart"><span>Shopping Cart</span></h1></div>
+		<div style="clear: both;"></div>
+	</div>
+	<div class="cf">
+		<div ng-init="init()">
+			<div class="shopping-cart">
+
+			<div class="column-labels">
+				<label class="cartcheckbox">
+					<div class="cartcheckbox">
+						<div class="squaredTwo checkall">
+							<input type="checkbox" id="checkall" ng-click="allCheckClicked()" ng-model="allChecked">
+							<label for="checkall"></label>
+						</div>
+					</div>
+				</label>
+			    <label class="product-image">Image</label>
+			    <label class="product-details">Product</label>
+			    <label class="product-price">Price</label>
+			    <label class="product-quantity">Quantity</label>
+			    <label class="product-removal">Remove</label>
+			    <label class="product-line-price">Total</label>
+			</div>
+
+			<div class="product animate-hide" ng-repeat="book in booksadded" ng-class="{'hideleft': selectedIndex == $index}">
+				<div class="cartcheckbox">
+					<div class="squaredTwo">
+						<input type="checkbox" id="{{book.isbn}}" ng-click="clickedbox(book);" ng-model="book.Selected">
+						<label for="{{book.isbn}}"></label>
+					</div>
+				</div>
+				<div class="animate-hide" ng-class="{'cartbookunchecked': !book.Selected}">
+				    <div class="product-image">
+				      <img ng-src="{{book.cover}}">
+				    </div>
+				    <div class="product-details">
+				      <div class="product-title">{{book.title}}</div>
+				      <p class="product-description">ISBN: {{book.isbn}}</p>
+				    </div>
+				    <div class="product-price">&euro; {{book.price}}</div>
+				    <div class="product-quantity">
+				      <!--<span class="myButton nbButton" ng-click='book.nb=book.nb-1'>-</span>-->
+				      <input type="number" min="1" class="booknb" ng-model="book.nb" ng-change="addOrMinus(book)">
+				      <!--<span class="myButton nbButton" ng-click='book.nb=book.nb+1'>+</span>-->
+				    </div>
+				    <div class="product-removal">
+				      <button class="remove-product myButton" ng-click="remove($index, book)">
+				        Remove
+				      </button>
+				    </div>
+				    <div class="product-line-price"> &euro; {{book.nb*book.price}}</div>
+				</div>
+			</div>
+			<div class="noitem" ng-show="booksadded.length==0"> You have 0 item in shopping cart</div>
+			<div class="totals">
+			    <div class="totals-item">
+			      <div class="label">Subtotal</div>
+			      <div class="totals-value" id="cart-subtotal">&euro; {{subtotal}}</div>
+			      <div style="clear: both;"></div>
+			    </div>
+			    <div class="totals-item" ng-disabled="loading">
+			      <div class="label">Discount</div>
+			      <div class="totals-value" id="cart-discount">&euro; {{discount}}</div>
+			      <div style="clear: both;"></div>
+			    </div>
+			    <div class="totals-item totals-item-total" ng-disabled="loading">
+			      <div class="label">Grand Total</div>
+			      <div class="totals-value" id="cart-total">&euro; {{total}}</div>
+			      <div style="clear: both;"></div>
+			    </div>
+			    <button class="myButton checkout" ng-disabled="loading">Checkout</button>
+			</div>
+				
+		</div>
+		
+	</div>
+</section>
