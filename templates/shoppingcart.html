@@ -34,7 +34,7 @@
 			<div class="product animate-hide" ng-repeat="book in booksadded" ng-class="{'hideleft': selectedIndex == $index}">
 				<div class="cartcheckbox">
 					<div class="squaredTwo">
-						<input type="checkbox" id="{{book.isbn}}" ng-click="clickedbox(book);" ng-model="book.Selected">
+						<input type="checkbox" id="{{book.isbn}}" ng-click="allCheckOrNot(book);" ng-model="book.Selected">
 						<label for="{{book.isbn}}"></label>
 					</div>
 				</div>
@@ -57,7 +57,7 @@
 				        Remove
 				      </button>
 				    </div>
-				    <div class="product-line-price">  {{book.nb*book.price&&book.nb<=30? '&euro;' + book.nb*book.price : 'Error, please insert a number smaller than 30 and bigger than 0'}}</div>
+				    <div class="product-line-price">&euro; {{book.nb*book.price}}</div>
 				</div>
 			</div>
 			<div class="noitem" ng-show="booksadded.length==0"> You have 0 item in shopping cart</div>
@@ -79,7 +79,6 @@
 			    </div>
 			    <button class="myButton checkout" ng-disabled="loading">Checkout</button>
 			</div>
-				
 		</div>
 		
 	</div>

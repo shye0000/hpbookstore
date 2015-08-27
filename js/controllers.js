@@ -1,12 +1,12 @@
 //controller of store view
 storeApp.controller('storeCtrl', function ($scope, $rootScope, bookFactory, cartService, settings, $cookies, $cookieStore, $location) {
 	//get book list when entering this view
-	$scope.init = function() {
+	$scope.init = function () {
 		bookFactory.getBooks()
-		.then(function(response) {
+		.then(function (response) {
 			$rootScope.bookList = response;
         },
-        function(data) {
+        function (data) {
             console.log('bookList retrieval failed.')
         });
 		
@@ -26,22 +26,16 @@ storeApp.controller('storeCtrl', function ($scope, $rootScope, bookFactory, cart
 });
 
 //controller of shopping cart view
-storeApp.controller('cartCtrl', function ($timeout, $scope, $rootScope, bookFactory, settings, cartService, $cookies, $cookieStore){
-	$scope.init = function() {
+storeApp.controller('cartCtrl', function ($timeout, $scope, $rootScope, bookFactory, settings, cartService, $cookies, $cookieStore, $window) {
+	$scope.init = function () {
 		$scope.selectedIndex = -1;
 		$scope.selection = [];
-		//if ($rootScope.booksadded.length == 0) {
-			//$scope.allChecked = false;
-			//$scope.allUnchecked = true;
-		//} else{
-			$scope.allChecked = true;
-			$scope.allUnchecked = false;
-			$scope.allCheckClicked();
-		//}
-		
-		
+		$scope.nberror = false;
+		$scope.allChecked = true;
+		$scope.allUnchecked = false;
+		$scope.allCheckClicked();	
 	};
-
+	//select all or deselect all in shopping cart
 	$scope.allCheckClicked = function () {
 		var boo = $scope.allChecked;
 		console.log($scope.allChecked);
@@ -53,7 +47,9 @@ storeApp.controller('cartCtrl', function ($timeout, $scope, $rootScope, bookFact
     	});
 		$scope.updateDiscount();
 	};
-	$scope.clickedbox = function (book) {
+	//when book selection changed
+	//check the books are all selected or not 
+	$scope.allCheckOrNot = function (book) {
         var count = 0;
         angular.forEach($rootScope.booksadded, function (item) {
             if(item.Selected) count++;	    
@@ -72,17 +68,30 @@ storeApp.controller('cartCtrl', function ($timeout, $scope, $rootScope, bookFact
         } 
         $scope.updateDiscount();
     };
+    //modify book quantiy in cart
 	$scope.addOrMinus = function (book) {
 		//if nb is number and nb > 0
 		//else do nothing
 		var num = /^[0-9\s\+]+$/;
-		console.log(book.nb);
-		if (book.nb && book.nb.toString().match(num) && book.nb <= 30) {
+		if(book.nb && book.nb.toString().match(num) && book.nb <= 30) {
 			cartService.addOrMinusBook(book, book.nb);
 			$scope.updateDiscount();
+		} 
+		else if(book.nb === null) {
+			//do nothing
+		}
+		else {
+			addErrorMessage();
+			$timeout(function () {
+				book.nb = 1;
+				cartService.addOrMinusBook(book, book.nb);
+				$scope.updateDiscount();
+			}, 1000);
+			
 		}
 		
 	};
+	//entirely remove a book
 	$scope.remove = function (idx, book) {
 		$scope.selectedIndex = idx;
 		$timeout(function () {
@@ -91,32 +100,66 @@ storeApp.controller('cartCtrl', function ($timeout, $scope, $rootScope, bookFact
 			$scope.updateDiscount();
 		}, 500);
 	};
+	//when cart changed without error
+	//update the discount and the final price
+	//only calculate the selected books in shopping cart
 	$scope.updateDiscount = function () {
-		//$scope.loading = true;
 		$scope.subtotal = 0;
 		$scope.discount = 0;
 		$scope.total = 0;
 		$scope.booksisbn = [];
 		if(!$scope.allUnchecked && ($rootScope.booksadded.length != 0)) {
-			for(var i=0; i<$rootScope.booksadded.length; i++){
-				if ($rootScope.booksadded[i].Selected) {
-					var j = $rootScope.booksadded[i].nb;
+			angular.forEach($rootScope.booksadded, function (item) {
+				if(item.Selected) {
+					var j = item.nb;
 					while (j>0) {
-						$scope.booksisbn.push($rootScope.booksadded[i].isbn);
-						$scope.subtotal += $rootScope.booksadded[i].price;
+						$scope.booksisbn.push(item.isbn);
+						$scope.subtotal += item.price;
 						j--;
 					}
 				}
-			}
+			});
 			bookFactory.getDiscount($scope.booksisbn)
-			.then(function(response) {
+			.then(function (response) {
 				$scope.discount = cartService.getBestDiscount(response, $scope.subtotal);
 		        $scope.total = $scope.subtotal - $scope.discount;
-		        if ($scope.discount > 0) $scope.discount = '-'+$scope.discount;
+		        if($scope.discount > 0) $scope.discount = '-'+$scope.discount;
 	        },
-	        function(data) {
+	        function (data) {
 	            console.log('discountList retrieval failed.')
 	        });
 		}
 	};
+	//when number input invalide, add a error message in page
+	function addErrorMessage () {
+		var message = angular.element('<div class="nberrormessage animate-hide" ng-class="{\'errormessage\': nberror}">Number error, please insert a number larger than 0 and smaller than 30.</div>');
+		var body = angular.element(document).find('body').eq(0);
+		console.log($window.pageYOffset);
+		message.css (
+			{
+				top: ($window.pageYOffset)+'px'
+			}
+		);
+		$timeout(function () {
+			message.css (
+				{
+					top: ($window.pageYOffset+65)+'px',
+					opacity: 1
+				}
+			);
+		}, 200);
+		$timeout(function () {
+			message.css (
+			{
+				top: ($window.pageYOffset+100)+'px',
+				opacity: 0
+			}
+		);
+		}, 2000);
+		body.append(message);
+		$timeout(function () {
+			message.remove();
+		}, 3000);
+		
+	}
 });

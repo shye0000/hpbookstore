@@ -52,7 +52,7 @@ li {
     top: 0;
     left: 0;
     right: 0;
-    background-color: rgba(10,10,10,0.9);!#1c1c1c;
+    background-color: rgba(10,10,10,0.95);!#1c1c1c;
     border-bottom: 1px solid #333;
     z-index: 20;
 }
@@ -123,7 +123,7 @@ li {
     !bottom: -3000px;
     height: calc(100vh - 65px);
     !background: #1c1c1c;
-    background-color: rgba(10,10,10,0.9);
+    background-color: rgba(10,10,10,0.95);
     border: 1px solid #333;
     white-space: nowrap;
     !overflow: hidden;
@@ -134,7 +134,7 @@ li {
 @media screen and (max-width: 600px) {
     #browse-sub{
         width: 100vw;
-        height: calc(100vh - 65px);
+        height: calc(100vh - 64px);
     }
 }
 @media screen and (max-width: 350px) {

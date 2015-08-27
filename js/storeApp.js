@@ -4,7 +4,7 @@ storeApp.run(function (bookFactory, $rootScope,$cookieStore, $window, $location)
   //initial cart
   $rootScope.booksisbn = [];
   //get books isbn from cookie
-  if ($cookieStore.get('booksadded'))
+  if($cookieStore.get('booksadded'))
     $rootScope.booksadded = $cookieStore.get('booksadded');
   else 
     $rootScope.booksadded = [];
@@ -13,14 +13,13 @@ storeApp.run(function (bookFactory, $rootScope,$cookieStore, $window, $location)
   $rootScope.cartHover = false;
   //page scroll to top when changing view 
   $rootScope.$on('$routeChangeSuccess', function () {
-    var interval = setInterval(function (){
-      if (document.readyState == 'complete') {
+    var interval = setInterval(function () {
+      if(document.readyState == 'complete') {
         $window.scrollTo(0, 0);
         clearInterval(interval);
       }
     }, 200);
   });
-
   $rootScope.gotocart = function () {
     $location.path('/cart');
   };
@@ -28,7 +27,7 @@ storeApp.run(function (bookFactory, $rootScope,$cookieStore, $window, $location)
 
 //angular router configuration, 2 views: store, shopping cart
 storeApp.config(['$routeProvider',
-  function($routeProvider) {
+  function ($routeProvider) {
     $routeProvider.
     when('/store', {
       templateUrl: '../templates/store.html',
@@ -50,7 +49,7 @@ storeApp.constant('settings', {
 });
 
 //a custom directive for book item in store view
-storeApp.directive('bookItem', function() {
+storeApp.directive('bookItem', function () {
   return {
     template:
       '<div class="post book">'
@@ -63,19 +62,20 @@ storeApp.directive('bookItem', function() {
   };
 });
 
-//directive to prevent page scrolling when scorlling overflowed shopping cart
+//directive to prevent page scrolling when scorlling overflowed shopping cart menu
 storeApp.directive('isolateScrolling', function () {
+  startY = 0;
   return {
     restrict: 'A',
       link: function (scope, element, attr) {
         element.bind('DOMMouseScroll', function (e) {
-          if (e.detail > 0 && this.clientHeight + this.scrollTop == this.scrollHeight) {
+          if(e.detail > 0 && this.clientHeight + this.scrollTop == this.scrollHeight) {
             this.scrollTop = this.scrollHeight - this.clientHeight;
             e.stopPropagation();
             e.preventDefault();
             return false;
           }
-          else if (e.detail < 0 && this.scrollTop <= 0) {
+          else if(e.detail < 0 && this.scrollTop <= 0) {
             this.scrollTop = 0;
             e.stopPropagation();
             e.preventDefault();
@@ -83,13 +83,14 @@ storeApp.directive('isolateScrolling', function () {
           }
         });
         element.bind('mousewheel', function (e) {
-          if (e.deltaY > 0 && this.clientHeight + this.scrollTop >= this.scrollHeight) {
+          console.log(e.deltaY);
+          if(e.deltaY > 0 && this.clientHeight + this.scrollTop >= this.scrollHeight) {
             this.scrollTop = this.scrollHeight - this.clientHeight;
             e.stopPropagation();
             e.preventDefault();
             return false;
           }
-          else if (e.deltaY < 0 && this.scrollTop <= 0) {
+          else if(e.deltaY < 0 && this.scrollTop <= 0) {
             this.scrollTop = 0;
             e.stopPropagation();
             e.preventDefault();
@@ -98,22 +99,43 @@ storeApp.directive('isolateScrolling', function () {
 
           return true;
         });
+        element.bind('touchstart', function (e) {
+          startY = e.touches[0].pageY;
+        });
+        element.bind('touchmove', function (e) {
+          console.log(e);
+          console.log(this.scrollTop);
+          console.log(this.scrollHeight);
+          if(startY - event.touches[0].pageY > 0 && this.clientHeight + this.scrollTop >= this.scrollHeight) {
+            this.scrollTop = this.scrollHeight - this.clientHeight;
+            e.stopPropagation();
+            e.preventDefault();
+            return false;
+          }
+          else if(startY - event.touches[0].pageY < 0 && this.scrollTop <= 0) {
+            this.scrollTop = 0;
+            e.stopPropagation();
+            e.preventDefault();
+            return false;
+          }
+          return true;
+        });
       
       }
   };
 });
 
 //add to card button with flying to cart effect 
-storeApp.directive('addToCartButton', function($window) {
-  function link(scope, element, attributes) {
-    element.on('click', function(event){
+storeApp.directive('addToCartButton', function ($window) {
+  function link (scope, element, attributes) {
+    element.on('click', function (event) {
       var imgSrc = attributes.targetsrc;
       var cartElem = angular.element(document.getElementsByClassName("shopping-cart"));
       var offsetTopCart = cartElem.prop('offsetTop');
       var offsetLeftCart = cartElem.prop('offsetLeft');
       var widthCart = cartElem.prop('offsetWidth');
       var heightCart = cartElem.prop('offsetHeight');
-      if (angular.element(event.target.parentNode.parentNode.parentNode.firstChild).prop('className') == 'bookCover'){
+      if(angular.element(event.target.parentNode.parentNode.parentNode.firstChild).prop('className') == 'bookCover'){
         var parentElem = angular.element(event.target.parentNode.parentNode.parentNode);
         var imgElem = angular.element(event.target.parentNode.parentNode.parentNode.childNodes[0]);
       }
@@ -168,32 +190,32 @@ storeApp.directive('addToCartButton', function($window) {
 });
 
 //factory for generating http get requests
-storeApp.factory('bookFactory', function ($http, settings, $q){
+storeApp.factory('bookFactory', function ($http, settings, $q) {
   return {
     //get book list
-    
     getBooks: function () {
       var def = $q.defer();
       $http.get(settings.baseURL)
       //$http.get('http://localhost:1337/henri-potier.xebia.fr/books')
-      .success(function(data) {
+      .success(function (data) {
         var bookList = data;
         def.resolve(bookList);
       })
-      .error(function() {
+      .error(function () {
         def.reject("Failed to get bookList");
       });
       return def.promise;
     },
+    //get discount list for a selection of books
     getDiscount: function (booksisbn) {
       var def = $q.defer();
       $http.get(settings.baseURL + '/' +  booksisbn.join(',') + '/commercialOffers')
       //$http.get('http://localhost:1337/henri-potier.xebia.fr/books' + '/' +  booksisbn.join(',') + '/commercialOffers')
-      .success(function(data) {
+      .success(function (data) {
         var discountList = data;
         def.resolve(discountList);
       })
-      .error(function() {
+      .error(function () {
         def.reject("Failed to get discountList");
       });
       return def.promise;
@@ -202,61 +224,63 @@ storeApp.factory('bookFactory', function ($http, settings, $q){
   }
 });
 
-//shopping cart services: addbook, minusbook, removebook, update cart, calculate best discount
+//shopping cart services: addbook, minusbook, removebook, update cart, calculate best discount, save cookie
 storeApp.service('cartService', function ($rootScope, $cookieStore, $cookies) {
     this.getBestDiscount = function (data, subtotal) {
       //data: discount information in json
       var bestDiscount = 0;
       var offers = data.offers;
       //loop in each kind of discount to find the best
-      for (var i = 0; i<offers.length; i++) {
+      angular.forEach(offers, function (offer) {
         //type percentage
-        if(offers[i].type == 'percentage') {
-          var discount = subtotal * offers[i].value / 100;
+        if(offer.type == 'percentage') {
+          var discount = subtotal * offer.value / 100;
         }
         //type minus
-        else if(offers[i].type == 'minus') {
-          var discount = offers[i].value;
+        else if(offer.type == 'minus') {
+          var discount = offer.value;
         }
         //type slice
-        else if(offers[i].type == 'slice') {
-          var discount = offers[i].value * Math.floor(subtotal / offers[i].sliceValue);
+        else if(offer.type == 'slice') {
+          var discount = offer.value * Math.floor(subtotal / offer.sliceValue);
         }
         else {
           var discount = 0;
         }
         //if current discount is better 
-        if (discount > bestDiscount) bestDiscount = discount;
-      }
+        if(discount > bestDiscount) bestDiscount = discount;
+      });
       return bestDiscount;
     };
+    //add book to cart
     this.addCart = function (book, nb) {
       var find = false;
-      for (var i =0; i<$rootScope.booksadded.length; i++) {
-        if($rootScope.booksadded[i].isbn == book.isbn) {
-          $rootScope.booksadded[i].nb += nb;
+      angular.forEach($rootScope.booksadded, function (item) {
+        if(item.isbn == book.isbn) {
+          item.nb += nb;
           find = true;
-          break;
         }
-      }
+      });
       if(!find) {
         $rootScope.booksadded.push(book);
         $rootScope.booksadded[$rootScope.booksadded.length-1].nb = nb;
       }
       this.saveCart();
     };
+    //modify book quantity
     this.addOrMinusBook= function (book, nb) {
-      for (var i =0; i<$rootScope.booksadded.length; i++) {
-        if($rootScope.booksadded[i].isbn == book.isbn) {
-          $rootScope.booksadded[i].nb = nb;
-          break;
+      angular.forEach($rootScope.booksadded, function (item) {
+        if(item.isbn == book.isbn) {
+          item.nb = nb;
         }
-      }
+      });
       this.saveCart();
     };
+    //called when shopping cart changed, save the cookie
     this.saveCart = function () {
       $cookieStore.put('booksadded',  $rootScope.booksadded);
     };
+    //entirely remove a book 
     this.removeBook = function (idx) {
       $rootScope.booksadded.splice(idx, 1);
       this.saveCart();
